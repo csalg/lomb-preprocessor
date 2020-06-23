@@ -27,6 +27,7 @@ class GermanTagger(Tagger):
         pass
 
     def _load_german_prepositions(self):
+        print(os.path.dirname(os.path.realpath(__file__)))
         prepositions_file = os.getcwd() + '/config' + '/german_separable_verb_prepositions.txt'
         with open(prepositions_file) as file:
             self.prepositions = file.read().splitlines()
