@@ -27,7 +27,8 @@ class LocalTranslationJob():
         print(f'Executing: {self.output_filename()}')
 
         translation_dictionary = self.serializer.get_translation_dictionary()
-        translation_dictionary = self.translator.translate(translation_dictionary)
+        if self.source_language != self.target_language:
+            translation_dictionary = self.translator.translate(translation_dictionary)
 
         lemmas_dictionary = self.serializer.get_lemmas_dictionary()
         lemmas_dictionary = self.tagger.tag(lemmas_dictionary)

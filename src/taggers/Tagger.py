@@ -24,12 +24,12 @@ class GermanTagger(Tagger):
     def tag(self, sentence_dictionary):
         for sentence in sentence_dictionary:
             sentence_dictionary[sentence] = self._make_token_dictionary(sentence)
-        pass
+        return sentence_dictionary
 
     def _load_german_prepositions(self):
-        print(os.path.dirname(os.path.realpath(__file__)))
-        prepositions_file = os.getcwd() + '/config' + '/german_separable_verb_prepositions.txt'
-        with open(prepositions_file) as file:
+        SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+        PREPOSITIONS_PATH = os.path.join(SCRIPT_PATH, 'files', 'german_separable_verb_prepositions.txt')
+        with open(PREPOSITIONS_PATH) as file:
             self.prepositions = file.read().splitlines()
 
     def _make_token_dictionary(self, sentence):

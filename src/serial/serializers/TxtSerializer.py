@@ -1,4 +1,5 @@
 import json
+import os
 from copy import copy
 
 from util import convert_to_utf8
@@ -15,9 +16,10 @@ class TxtSerializer(SerializerABC):
         with open(filename) as file:
             source = file.read()
         chunks_as_text = text_to_chunks(source)
+        self.source_language, self.target_language = source_language, target_language
         self.__chunks = list(map(lambda txt : Chunk(txt), chunks_as_text))
         self.__translation_dictionary = {chunk : "" for chunk in chunks_as_text}
-        self.__lemmas_dictionary = copy(self.__translation_dictionary)
+        self.__lemmas_dictionary = {chunk : "" for chunk in chunks_as_text}
         self.support_language, self.target_language = source_language, target_language
 
     def get_translation_dictionary(self):
@@ -71,14 +73,15 @@ class TxtSerializer(SerializerABC):
         f"""
 <html>
 <head>
-    <meta name="title" value="{output_filename}"
-    <meta name="source-language" value="{self.source_language}"
-    <meta name="support-language" value="{self.target_language}"
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="title" value="{os.path.basename(output_filename)}">
+    <meta name="source-language" value="{self.source_language}">
+    <meta name="support-language" value="{self.target_language}">
 </head>
 <body>
 {''.join(translated_chunks)}
 </body>
 </html>
         """
-        with open(output_filename + '.xml', 'w') as file:
+        with open(output_filename + '.html', 'w') as file:
             file.write(translation)
