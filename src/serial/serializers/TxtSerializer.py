@@ -68,7 +68,11 @@ class TxtSerializer(SerializerABC):
             file.write(translation)
 
     def _save_as_html(self, output_filename):
-        translated_chunks = map(lambda chunk : chunk.to_span(), self.__chunks)
+        translated_chunks =[]
+        id = 0
+        for chunk in self.__chunks:
+            translated_chunks.append(chunk.to_span(id))
+            id += 1
         translation = \
         f"""
 <html>

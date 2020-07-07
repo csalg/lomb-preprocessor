@@ -1,4 +1,4 @@
-languages = ['en', 'es', 'de']
+languages = ['en', 'es', 'de', 'zh']
 languages_map = {
     'deu': 'de',
     'esp': 'es',
@@ -15,6 +15,5 @@ def infer_language(language):
         return language
     if language in languages_map:
         return languages_map[language]
-    
     raise Exception(f"Could not infer language from '{language}'")
     

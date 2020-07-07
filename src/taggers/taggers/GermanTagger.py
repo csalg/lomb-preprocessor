@@ -4,21 +4,13 @@ from copy import copy
 
 import spacy
 
-from .regex import *
+from taggers.regex import *
+from taggers.taggers.TaggerABC import TaggerABC
 
 
-class Tagger(ABC):
+class GermanTagger(TaggerABC):
     def __init__(self, processor=None):
-        self.processor = processor
-
-    @abstractmethod
-    def tag(self, sentence_dictionary):
-        pass
-
-
-class GermanTagger(Tagger):
-    def __init__(self, processor=None):
-        self.processor = processor if processor else spacy.load('de_core_news_sm')
+        super().__init__(processor if processor else spacy.load('de_core_news_sm'))
         self._load_german_prepositions()
 
     def tag(self, sentence_dictionary):
@@ -28,7 +20,7 @@ class GermanTagger(Tagger):
 
     def _load_german_prepositions(self):
         SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-        PREPOSITIONS_PATH = os.path.join(SCRIPT_PATH, 'files', 'german_separable_verb_prepositions.txt')
+        PREPOSITIONS_PATH = os.path.join(SCRIPT_PATH,'..', 'files', 'german_separable_verb_prepositions.txt')
         with open(PREPOSITIONS_PATH) as file:
             self.prepositions = file.read().splitlines()
 
