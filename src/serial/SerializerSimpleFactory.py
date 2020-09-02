@@ -8,7 +8,8 @@ from serial.serializers.EpubSerializer import EpubSerializer
 extensions_to_serializers = {
     'vtt': VttSerializer,
     'txt': TxtSerializer,
-    'epub': EpubSerializer,
+    # 'epub': EpubSerializer,
+    'epub': TxtSerializer.from_epub,
 }
 
 def convert(filename):

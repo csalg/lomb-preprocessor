@@ -1,26 +1,26 @@
+import json
 import logging
 import os
 import re
 from abc import ABC, abstractmethod
 from shutil import which
 from random import randint
-from dataclasses import dataclass
 from time import sleep
 from datetime import datetime, timedelta
 import pickle
 
 from selenium import webdriver  
-from selenium.webdriver.common.keys import Keys  
 from selenium.webdriver.chrome.options import Options
 
 from config import HEADLESS_MODE
 from .TranslatorABC import TranslatorABC
+from .util import to_deepl_language
 
 SENTENCE_SEPARATOR = "\n-&----&-\n"
 ID_SEPARATOR = "\n"
 MIN_WAIT_FOR_TRANSLATION = 5
 MAX_WAIT_FOR_TRANSLATION = 60
-MAX_CHARACTERS_PER_BUFFER = 900
+MAX_CHARACTERS_PER_BUFFER = 3200
 MAX_NUMBER_OF_REQUESTS_WITH_SAME_DRIVER = 30
 WAIT_BETWEEN_DRIVER_CHANGE = 120
 MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN = 5
@@ -49,7 +49,10 @@ class DeepLTranslator(TranslatorABC):
             except:
                 translated_sentences= self.interaction.dispatch_translation()
                 translation_dictionary.update(translated_sentences)
-                self.interaction.add(sentence)
+                try:
+                    self.interaction.add(sentence)
+                except:
+                    logging.warning(f'Failed to add chunk of length {len(sentence)}')
 
         translated_sentences = self.interaction.dispatch_translation()
         translation_dictionary.update(translated_sentences)
@@ -68,7 +71,7 @@ class InteractionAgentABC:
 
         self.buffer = ""
         self.id_to_source_sentence = {}
-        self.current_sentence_id = randint(2400, 9999)
+        self.current_sentence_id = randint(1000, 1999)
         self.browser = WebsiteInteractionAdaptor(source_language, target_language)
         self.number_of_requests = 0
         self.number_of_timeouts = 0
@@ -80,6 +83,8 @@ class InteractionAgentABC:
         self.buffer += adapted_sentence
         self.id_to_source_sentence[self.current_sentence_id]=sentence
         self.current_sentence_id+=1
+        self.current_sentence_id = 1000 if self.current_sentence_id == 10000 else self.current_sentence_id
+
 
     def dispatch_translation(self):
         self.number_of_requests += 1
@@ -209,11 +214,15 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
 
     def translate_buffer(self, source_buffer):
         source_textarea = self.driver.find_elements_by_class_name("lmt__source_textarea")[0]
+        print(source_buffer)
         self.__insert_source_buffer_in_textarea(source_buffer, source_textarea)
 
         translated_buffer = ""
         while len(translated_buffer) / len(source_buffer) < MINIMUM_ACCEPTABLE_TRANSLATION_RATIO:
-            source_textarea.send_keys('  ')
+            try:
+                source_textarea.send_keys('  ')
+            except Exception as e:
+                logging.warning(e)
             self.__block_until_translation_received()
             target_textarea = self.driver.find_elements_by_class_name("lmt__target_textarea")[0]
             translated_buffer = str(target_textarea.get_attribute('value'))
@@ -221,19 +230,28 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
         return translated_buffer
 
     def __insert_source_buffer_in_textarea(self, source_buffer, source_textarea):
-        sleep(1)
-        source_textarea.send_keys('  ')
-        sleep(2)
-        source_textarea.send_keys('  \n')
+        target_lang = to_deepl_language(self.source_language), to_deepl_language(self.target_language)
+        while True:
+            try:
+                sleep(1)
+                source_textarea.send_keys('  ')
+                sleep(2)
+                source_textarea.send_keys('  \n')
+                break
+            except Exception as e:
+                logging.warning(e)
         try:
+            escaped_buffer = source_buffer.replace('`', '').replace('$', "S").replace("\\", "\\\\")
             self.driver.execute_script(f'''
-            document.querySelector('button[dl-lang="{self.source_language.upper()}"]').click();
-            document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-lang="{self.target_language.upper()}"]').click();
+            document.querySelector('button[dl-test="translator-source-lang-btn"]').click();
+            document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
+            // document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
+            // document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             var source_textarea = document.getElementsByClassName("lmt__source_textarea")[0];
-            source_textarea.value = `{source_buffer.replace('`', '')}`
+            source_textarea.value = `{escaped_buffer}`
             source_textarea.dispatchEvent(new Event('change'))
-            document.querySelector('button[dl-lang="{self.source_language.upper()}"]').click();
-            document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-lang="{self.target_language.upper()}"]').click();
+            // document.querySelector('button[dl-lang="{self.source_language.upper()}"]').click();
+            // document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             ''')
         except Exception as e:
             raise WebsiteInteractionAdaptor.EXCEPTION_INSERTING_TEXT(source_buffer, e)

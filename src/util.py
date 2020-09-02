@@ -10,7 +10,11 @@ def convert_to_utf8(filename):
     with open(filename, 'rb') as file:
         raw_bytes = file.read()
     detected_character_set = chardet.detect(raw_bytes)
-    text_as_string = raw_bytes.decode(detected_character_set['encoding'])
+    print(detected_character_set)
+    try:
+        text_as_string = raw_bytes.decode(detected_character_set['encoding'])
+    except:
+        return
 
     with open(filename+'.bak', 'wb') as file:
         file.write(raw_bytes)

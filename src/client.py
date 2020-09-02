@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 import argparse
 import os
+import sys
 
 from jobs.LocalTranslationJob import run_local_translation_job_from_filename
 

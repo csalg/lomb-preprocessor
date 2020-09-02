@@ -1,4 +1,4 @@
-languages = ['en', 'es', 'de', 'zh']
+languages = ['en', 'es', 'de', 'zh', 'fr']
 languages_map = {
     'deu': 'de',
     'esp': 'es',
@@ -6,6 +6,12 @@ languages_map = {
     'en-us': 'en',
     'en-US': 'en'
 }
+
+deepl_languages = {
+    'en': 'en-US'
+}
+
+to_deepl_language = lambda lang : deepl_languages[lang] if lang in deepl_languages else f"{lang.lower()}-{lang.upper()}"
 
 is_recognized_language = lambda language : language in languages or language in languages_map
 

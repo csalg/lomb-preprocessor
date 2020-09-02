@@ -1,4 +1,4 @@
-from translators.DeepLTranslator import DeepLTranslator, InteractionAgentABC, ChineseInteractionAgent
+from translators.DeepLTranslator import DeepLTranslator, ChineseInteractionAgent
 
 
 def create_translator(source_language, target_language):

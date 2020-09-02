@@ -34,11 +34,17 @@ class BaseSpacyTagger(TaggerABC):
 
 class SpanishTagger(BaseSpacyTagger):
     def __init__(self):
-        super(SpanishTagger, self).__init__( lambda : spacy.load('es_core_news_sm'))
+        super(SpanishTagger, self).__init__( lambda : spacy.load('es_core_news_lg'))
 
 
 class EnglishTagger(BaseSpacyTagger):
     def __init__(self):
-        super(EnglishTagger, self).__init__( lambda : spacy.load('en_core_web_sm'))
+        super(EnglishTagger, self).__init__( lambda : spacy.load('en_core_web_md'))
+
+
+class FrenchTagger(BaseSpacyTagger):
+    def __init__(self):
+        super(FrenchTagger, self).__init__( lambda : spacy.load('fr_core_news_lg'))
+
 
 

@@ -10,7 +10,7 @@ from taggers.taggers.TaggerABC import TaggerABC
 
 class GermanTagger(TaggerABC):
     def __init__(self, processor=None):
-        super().__init__(processor if processor else spacy.load('de_core_news_sm'))
+        super().__init__(processor if processor else spacy.load('de_core_news_lg'))
         self._load_german_prepositions()
 
     def tag(self, sentence_dictionary):

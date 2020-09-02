@@ -2,6 +2,9 @@ import json
 import os
 from copy import copy
 
+import ebooklib
+from bs4 import BeautifulSoup
+
 from util import convert_to_utf8
 
 from .SerializerABC import SerializerABC
@@ -11,16 +14,38 @@ from ..Chunk import Chunk
 
 class TxtSerializer(SerializerABC):
     def __init__(self, filename, source_language, target_language):
-        super().__init__(filename, source_language, target_language)
         convert_to_utf8(filename)
+
         with open(filename) as file:
             source = file.read()
         chunks_as_text = text_to_chunks(source)
-        self.source_language, self.target_language = source_language, target_language
-        self.__chunks = list(map(lambda txt : Chunk(txt), chunks_as_text))
-        self.__translation_dictionary = {chunk : "" for chunk in chunks_as_text}
-        self.__lemmas_dictionary = {chunk : "" for chunk in chunks_as_text}
-        self.support_language, self.target_language = source_language, target_language
+
+        self.__source_language, self.__target_language = source_language, target_language
+
+        self.__chunks                   = list(map(lambda txt : Chunk(txt), chunks_as_text))
+        self.__translation_dictionary   = {chunk : "" for chunk in chunks_as_text}
+        self.__lemmas_dictionary        = {chunk : "" for chunk in chunks_as_text}
+
+    @classmethod
+    def from_epub(cls,filename,*args):
+        book = ebooklib.epub.read_epub(filename)
+        buffer = ""
+
+        for document in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+            try:
+                doc = document.get_content().decode('utf-8')
+                soup = BeautifulSoup(doc, 'html5lib')
+                buffer += soup.get_text()
+            except:
+                pass
+
+        txt_filename = filename.rsplit('.')[0] + '.txt'
+
+        with open(txt_filename, 'w') as file:
+            file.write(buffer)
+
+        return cls(txt_filename,*args)
+
 
     def get_translation_dictionary(self):
         return self.__translation_dictionary
@@ -79,8 +104,8 @@ class TxtSerializer(SerializerABC):
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="title" value="{os.path.basename(output_filename)}">
-    <meta name="source-language" value="{self.source_language}">
-    <meta name="support-language" value="{self.target_language}">
+    <meta name="source-language" value="{self.__source_language}">
+    <meta name="support-language" value="{self.__target_language}">
 </head>
 <body>
 {''.join(translated_chunks)}
