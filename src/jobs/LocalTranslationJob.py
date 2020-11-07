@@ -3,9 +3,10 @@ from os.path import splitext
 # from jobs.TranslationJobABC import TranslationJob
 from serial import SerializerSimpleFactory
 from taggers.createTagger import createTagger
-from translators.DeepLTranslator import DeepLTranslator
-from translators.TranslatorFactory import create_translator
-from translators.util import infer_language
+from translators.selenium_translators import GoogleTranslator
+from translators_old.DeepLTranslator import DeepLTranslator
+from translators_old.TranslatorFactory import create_translator
+from translators_old.util import infer_language
 from util import parse_title_source_language_and_extension_from_filename
 
 
@@ -18,7 +19,7 @@ class LocalTranslationJob():
         serializer_constructor = SerializerSimpleFactory.create(self.extension)
         self.serializer = serializer_constructor(input_filename, self.source_language, self.target_language)
         self.tagger = createTagger(self.source_language)()
-        self.translator = create_translator(self.source_language, self.target_language)
+        self.translator = GoogleTranslator(self.source_language, self.target_language)
 
     def run(self):
         print(f'Executing: {self.output_filename()}')

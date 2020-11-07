@@ -47,4 +47,7 @@ class FrenchTagger(BaseSpacyTagger):
         super(FrenchTagger, self).__init__( lambda : spacy.load('fr_core_news_lg'))
 
 
+class DanishTagger(BaseSpacyTagger):
+    def __init__(self):
+        super(DanishTagger, self).__init__( lambda : spacy.load('da_core_news_lg'))
 

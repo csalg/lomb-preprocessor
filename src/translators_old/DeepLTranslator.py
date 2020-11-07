@@ -60,7 +60,7 @@ class DeepLTranslator(TranslatorABC):
         return translation_dictionary
 
 
-class InteractionAgentABC:
+class InteractionAgent:
     """
     High level orchestration class which delegates the implementation details downstream.
     """
@@ -158,7 +158,7 @@ class InteractionAgentABC:
         return buffer_translation_dictionary
 
 
-class DialogInteractionABC(ABC):
+class IDialogInteraction:
     """
     This is an adaptor between the 'language' of the website, and a language of successful attempts
     or exceptions that can be reasoned about.
@@ -191,7 +191,7 @@ class DialogInteractionABC(ABC):
         pass
 
 
-class WebsiteInteractionAdaptor(DialogInteractionABC):
+class WebsiteInteractionAdaptor(IDialogInteraction):
     """
     This is an adaptor between the 'language' of the website, and
     exceptions we can reason about and handle.
@@ -246,10 +246,6 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
             self.driver.execute_script(f'''
             var cookiesButton = document.querySelector('button.dl_cookieBanner--buttonAll');
             if (cookiesButton) cookiesButton.click();
-            //document.querySelector('button[dl-test="translator-source-lang-btn"]').click();
-            //document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
-            //document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
-            //document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             var source_textarea = document.getElementsByClassName("lmt__source_textarea")[0];
             source_textarea.value = `{escaped_buffer}`
             source_textarea.dispatchEvent(new Event('change'))
@@ -257,8 +253,6 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
             document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
             document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
             document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
-            // document.querySelector('button[dl-lang="{self.source_language.upper()}"]').click();
-            // document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             ''')
         except Exception as e:
             raise WebsiteInteractionAdaptor.EXCEPTION_INSERTING_TEXT(source_buffer, e)
@@ -367,7 +361,7 @@ class IdAndTranslation():
         self.text = ""
 
 
-class ChineseInteractionAgent(InteractionAgentABC):
+class ChineseInteractionAgent(InteractionAgent):
     matchNumbers = re.compile('^\d{4}$')
 
     def __init__(self, *args, **kwargs):
