@@ -230,7 +230,7 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
         return translated_buffer
 
     def __insert_source_buffer_in_textarea(self, source_buffer, source_textarea):
-        target_lang = to_deepl_language(self.source_language), to_deepl_language(self.target_language)
+        _, target_lang = to_deepl_language(self.source_language), to_deepl_language(self.target_language)
         while True:
             try:
                 sleep(1)
@@ -241,15 +241,22 @@ class WebsiteInteractionAdaptor(DialogInteractionABC):
             except Exception as e:
                 logging.warning(e)
         try:
+            print(target_lang)
             escaped_buffer = source_buffer.replace('`', '').replace('$', "S").replace("\\", "\\\\")
             self.driver.execute_script(f'''
-            document.querySelector('button[dl-test="translator-source-lang-btn"]').click();
-            document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
-            // document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
-            // document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
+            var cookiesButton = document.querySelector('button.dl_cookieBanner--buttonAll');
+            if (cookiesButton) cookiesButton.click();
+            //document.querySelector('button[dl-test="translator-source-lang-btn"]').click();
+            //document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
+            //document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
+            //document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             var source_textarea = document.getElementsByClassName("lmt__source_textarea")[0];
             source_textarea.value = `{escaped_buffer}`
             source_textarea.dispatchEvent(new Event('change'))
+            document.querySelector('button[dl-test="translator-source-lang-btn"]').click();
+            document.querySelector('div[dl-test="translator-source-lang-list"]>button[dl-test="translator-lang-option-{self.source_language.lower()}"]').click();
+            document.querySelector('button[dl-test="translator-target-lang-btn"]').click();
+            document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             // document.querySelector('button[dl-lang="{self.source_language.upper()}"]').click();
             // document.querySelector('div[dl-test="translator-target-lang-list"]>button[dl-test="translator-lang-option-{target_lang}"]').click();
             ''')
