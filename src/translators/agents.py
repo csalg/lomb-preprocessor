@@ -113,7 +113,10 @@ class GoogleTranslateAgent(AgentABC):
             try:
                 translated_buffer = self.__get_result_method1()
             except:
-                translated_buffer = self.__get_result_method2()
+                try:
+                    translated_buffer = self.__get_result_method2()
+                except:
+                    continue
             print('Translated buffer')
             print(translated_buffer)
             if MINIMUM_ACCEPTABLE_TRANSLATION_RATIO < (len(translated_buffer) / source_buffer_length):

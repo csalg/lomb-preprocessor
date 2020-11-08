@@ -41,6 +41,7 @@ class SeleniumTranslator():
             if len(buffer+source_sentence_encoded) > MAX_CHARACTERS_PER_BUFFER:
                 if len(buffer) > MAX_CHARACTERS_PER_BUFFER:
                     logging.warning('Found a sentence that was too large to translate. skipping')
+                    buffer = ""
                 else:
                     if requests_with_same_driver == MAX_NUMBER_OF_REQUESTS_WITH_SAME_DRIVER:
                         self.agent.close()
@@ -62,10 +63,12 @@ class SeleniumTranslator():
 
     def __next_id(self):
         self.__current_sentence_id += 1
-        self.__current_sentence_id = self.__current_sentence_id % 10000
-        return self.__current_sentence_id
+        self.__current_sentence_id = self.__current_sentence_id % 9000
+        return self.__current_sentence_id + 1000
 
     def __buffer_to_new_translations(self,ids_to_source_sentences, buffer):
+        if len(buffer) > MAX_CHARACTERS_PER_BUFFER:
+            raise Exception(f'Buffer length {len(buffer)} exceeds the limit ({MAX_CHARACTERS_PER_BUFFER})')
         timeouts = 1
         while True:
             try:

@@ -10,12 +10,18 @@ extensions_to_serializers = {
     'txt': TxtSerializer,
     # 'epub': EpubSerializer,
     'epub': TxtSerializer.from_epub,
+    'html': TxtSerializer.from_epub,
 }
 
 def convert(filename):
     _, extension = os.path.splitext(filename)
     extension = extension[1:]
-    converter = converters[extension]
+    if extension in extensions_to_serializers:
+        converter = converters[extension]
+    elif filename[0:4] == 'http':
+        converter = TxtSerializer.from_website
+    else:
+        raise Exception(f'Serializer not found for {filename}')
     return converter(filename)
 
 def create(extension):

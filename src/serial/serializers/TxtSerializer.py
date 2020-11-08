@@ -3,7 +3,9 @@ import os
 from copy import copy
 
 import ebooklib
+import requests
 from bs4 import BeautifulSoup
+from readabilipy import simple_json_from_html_string
 
 from util import convert_to_utf8
 
@@ -46,6 +48,29 @@ class TxtSerializer(SerializerABC):
 
         return cls(txt_filename,*args)
 
+    @classmethod
+    def from_html(cls,filename,*args):
+        with open(filename, 'r') as file:
+            raw_html = file.read()
+
+        buffer = BeautifulSoup(raw_html, 'html5lib').get_text(separator="\n\n")
+
+        txt_filename = filename.rsplit('.')[0] + '.txt'
+
+        with open(txt_filename, 'w') as file:
+            file.write(buffer)
+
+        return cls(txt_filename, *args)
+
+    @classmethod
+    def from_website(cls, url, *args):
+        req = requests.get(url)
+        article = simple_json_from_html_string(req.text, use_readability=True)
+        buffer = BeautifulSoup(article['content'], 'html5lib').get_text(separator="\n\n")
+        filename = clean_filename(article['title']) + '.txt'
+        with open(filename, 'w') as file:
+            file.write(buffer)
+        return cls(filename, *args)
 
     def get_translation_dictionary(self):
         return self.__translation_dictionary
@@ -114,3 +139,26 @@ class TxtSerializer(SerializerABC):
         """
         with open(output_filename + '.html', 'w') as file:
             file.write(translation)
+
+
+import unicodedata
+import string
+
+valid_filename_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+char_limit = 70
+
+
+def clean_filename(filename, whitelist=valid_filename_chars, replace=' '):
+    # replace spaces
+    for r in replace:
+        filename = filename.replace(r, '_')
+
+    # keep only valid ascii chars
+    cleaned_filename = unicodedata.normalize('NFKD', filename).encode('ASCII', 'ignore').decode()
+
+    # keep only whitelisted chars
+    cleaned_filename = ''.join(c for c in cleaned_filename if c in whitelist)
+    if len(cleaned_filename) > char_limit:
+        print(
+            "Warning, filename truncated because it was over {}. Filenames may no longer be unique".format(char_limit))
+    return cleaned_filename[:char_limit]
