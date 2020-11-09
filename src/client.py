@@ -40,6 +40,6 @@ if __name__ == '__main__':
     #     exit(0)
 
     for filename in args.files:
-        filename = os.path.abspath(filename)
+        # filename = os.path.abspath(filename)
         # run_local_translation_job_from_filename_celery_task.delay(filename, args.source, args.target)
         run_local_translation_job_from_filename(args.source, args.target, filename, args.json)

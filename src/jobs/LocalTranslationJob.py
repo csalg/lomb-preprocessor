@@ -16,7 +16,7 @@ class LocalTranslationJob():
         self.target_language        = self._deduce_target_language(target_language)
         self.title, self.extension  = self._split_filename_into_title_and_extension(input_filename)
 
-        serializer_constructor = SerializerSimpleFactory.create(self.extension)
+        serializer_constructor = SerializerSimpleFactory.create(input_filename)
         self.serializer = serializer_constructor(input_filename, self.source_language, self.target_language)
         self.tagger = createTagger(self.source_language)()
         self.translator = GoogleTranslator(self.source_language, self.target_language)
