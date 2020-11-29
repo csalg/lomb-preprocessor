@@ -19,7 +19,7 @@ class LocalTranslationJob():
         serializer_constructor = SerializerSimpleFactory.create(input_filename)
         self.serializer = serializer_constructor(input_filename, self.source_language, self.target_language)
         self.tagger = createTagger(self.source_language)()
-        self.translator = GoogleTranslator(self.source_language, self.target_language)
+        self.translator = DeepLTranslator(self.source_language, self.target_language)
 
     def run(self):
         print(f'Executing: {self.output_filename()}')

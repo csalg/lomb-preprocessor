@@ -33,32 +33,6 @@ TRANSLATION_DICTIONARY_FILENAME = 'translation_dictionary.pkl'
 
 logging.basicConfig(level=logging.INFO)
 
-class DeepLTranslator(TranslatorABC):
-    def __init__(self, source_language, target_language, interaction_agent_constructor):
-        super().__init__(source_language,target_language)
-        self.interaction = interaction_agent_constructor(source_language, target_language)
-
-    def translate(self, translation_dictionary):
-        translation_dictionary = PersistedDictionary(translation_dictionary)
-
-        for sentence in translation_dictionary.keys():
-            if translation_dictionary[sentence]:
-                continue
-            try:
-                self.interaction.add(sentence)
-            except:
-                translated_sentences= self.interaction.dispatch_translation()
-                translation_dictionary.update(translated_sentences)
-                try:
-                    self.interaction.add(sentence)
-                except:
-                    logging.warning(f'Failed to add chunk of length {len(sentence)}')
-
-        translated_sentences = self.interaction.dispatch_translation()
-        translation_dictionary.update(translated_sentences)
-        translation_dictionary.delete_pickle()
-        return translation_dictionary
-
 
 class InteractionAgent:
     """
@@ -156,7 +130,6 @@ class InteractionAgent:
                 target_sentence = sentence.text
                 buffer_translation_dictionary[source_sentence] = target_sentence
         return buffer_translation_dictionary
-
 
 class IDialogInteraction:
     """
@@ -402,3 +375,30 @@ class ChineseInteractionAgent(InteractionAgent):
             i += 1
 
         return buffer_translation_dictionary
+
+class DeepLTranslator(TranslatorABC):
+    def __init__(self, source_language, target_language, interaction_agent_constructor = ChineseInteractionAgent):
+        super().__init__(source_language,target_language)
+        self.interaction = interaction_agent_constructor(source_language, target_language)
+
+    def translate(self, translation_dictionary):
+        translation_dictionary = PersistedDictionary(translation_dictionary)
+
+        for sentence in translation_dictionary.keys():
+            if translation_dictionary[sentence]:
+                continue
+            try:
+                self.interaction.add(sentence)
+            except:
+                translated_sentences= self.interaction.dispatch_translation()
+                translation_dictionary.update(translated_sentences)
+                try:
+                    self.interaction.add(sentence)
+                except:
+                    logging.warning(f'Failed to add chunk of length {len(sentence)}')
+
+        translated_sentences = self.interaction.dispatch_translation()
+        translation_dictionary.update(translated_sentences)
+        translation_dictionary.delete_pickle()
+        return translation_dictionary
+
