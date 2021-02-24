@@ -4,6 +4,7 @@ import os
 import sys
 
 from jobs.LocalTranslationJob import run_local_translation_job_from_filename
+from logging_ import logger
 
 
 def parse_arguments():
@@ -29,17 +30,11 @@ def parse_arguments():
 
 if __name__ == '__main__':
     args = parse_arguments()
-    print(args)
+    filenames = "\n\n" + "\n".join(args.files) + "\n"
+    logger.info(f'The following files will be processed: {filenames}')
 
     if args.source is None:
-        print("Source language was not provided. The program will attempt to parse it from the filename")
-
-    # if args.package:
-    #     run_package_translation_job(args.source, args.target, args.files, args.json)
-    #     print('package')
-    #     exit(0)
+        logger.info("Source language was not provided. The program will attempt to parse it from the filename \n")
 
     for filename in args.files:
-        # filename = os.path.abspath(filename)
-        # run_local_translation_job_from_filename_celery_task.delay(filename, args.source, args.target)
         run_local_translation_job_from_filename(args.source, args.target, filename, args.json)
