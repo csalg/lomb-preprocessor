@@ -1,14 +1,11 @@
-import json
 from dataclasses import dataclass, asdict
-from functools import reduce
-from statistics import mean, stdev
 
-from bs4 import BeautifulSoup,NavigableString
+from bs4 import BeautifulSoup
 import ebooklib
 from ebooklib import epub
 
 from ._template import SerializerABC
-from serial._util import regex_that_breaks_into_chunks, text_to_chunks
+from serial._serializers._util import text_to_chunks
 
 
 open_tag = lambda i: f'<span data-chunk-id={i} data-support-text="" class="lomb-chunk">'

@@ -10,7 +10,7 @@ from readabilipy import simple_json_from_html_string
 from util import convert_to_utf8
 
 from ._template import SerializerABC, Chunk
-from serial._util import text_to_chunks
+from serial._serializers._util import text_to_chunks
 
 
 class TxtSerializer(SerializerABC):

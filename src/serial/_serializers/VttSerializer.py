@@ -1,5 +1,5 @@
 import os
-from copy import copy, deepcopy
+from copy import deepcopy
 from os.path import splitext
 
 import webvtt
@@ -7,7 +7,7 @@ import webvtt
 from util import convert_to_utf8
 
 from ._template import SerializerABC
-from serial._util import convert_to_key, format_caption
+from serial._serializers._util import convert_to_key, format_caption
 
 class VttSerializer(SerializerABC):
 
