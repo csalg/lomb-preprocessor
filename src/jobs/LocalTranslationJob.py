@@ -3,9 +3,9 @@ from os.path import splitext
 
 from termcolor import colored
 
+import serial
 from util import LombPreprocessorException
 from logging_ import logger
-from serial import SerializerSimpleFactory
 from taggers.createTagger import createTagger
 from translators.selenium_translators import GoogleTranslator, DeepLTranslator
 from translators_old.util import infer_language
@@ -20,7 +20,7 @@ class LocalTranslationJob():
         if os.path.isfile(self.output_filename()):
             raise FileExistsException(f'{self.output_filename()} found in directory. Skipping')
 
-        serializer_constructor = SerializerSimpleFactory.create(input_filename)
+        serializer_constructor = serial.create_constructor(input_filename)
         self.serializer = serializer_constructor(input_filename, self.source_language, self.target_language)
         self.tagger = createTagger(self.source_language)()
         if self.source_language in ['dk', 'da']:
