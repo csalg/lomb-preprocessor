@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup,NavigableString
 import ebooklib
 from ebooklib import epub
 
-from .SerializerABC import SerializerABC
-from serial.util import regex_that_breaks_into_chunks, text_to_chunks
+from ._template import SerializerABC
+from serial._util import regex_that_breaks_into_chunks, text_to_chunks
 
 
 open_tag = lambda i: f'<span data-chunk-id={i} data-support-text="" class="lomb-chunk">'

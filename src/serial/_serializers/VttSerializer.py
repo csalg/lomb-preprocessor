@@ -1,3 +1,4 @@
+import os
 from copy import copy, deepcopy
 from os.path import splitext
 
@@ -5,8 +6,8 @@ import webvtt
 
 from util import convert_to_utf8
 
-from .SerializerABC import SerializerABC
-from serial.util import convert_to_key, format_caption
+from ._template import SerializerABC
+from serial._util import convert_to_key, format_caption
 
 class VttSerializer(SerializerABC):
 
@@ -25,6 +26,14 @@ class VttSerializer(SerializerABC):
             key = convert_to_key(caption.text)
             self.translation_dictionary[key] = ''
             self.lemmas_dictionary[key] = ''
+
+    @classmethod
+    def from_srt(cls, filename, source_language, target_language):
+        subs = webvtt.from_srt(filename)
+        subs.save()
+        title, _ = os.path.splitext(filename)
+        new_filename = title + '.vtt'
+        return cls(new_filename, source_language, target_language)
 
     def get_translation_dictionary(self):
         return self.translation_dictionary
