@@ -1,3 +1,5 @@
+import html
+import json
 import os
 import unicodedata
 import string
@@ -9,7 +11,7 @@ from readabilipy import simple_json_from_html_string
 
 from util import convert_to_utf8
 
-from ._interface import SerializerABC, Chunk
+from ._interface import SerializerABC
 from serial._serializers._util import text_to_chunks
 
 
@@ -152,3 +154,25 @@ def clean_filename(filename, whitelist=valid_filename_chars, replace=' '):
         print(
             "Warning, filename truncated because it was over {}. Filenames may no longer be unique".format(char_limit))
     return cleaned_filename[:char_limit]
+
+
+class Chunk:
+    def __init__(self, text, support_text="", tokens_to_lemmas={}):
+        self.text = text
+        self.support_text = support_text
+        self.tokens_to_lemmas = tokens_to_lemmas
+
+    def to_span(self,id):
+        tokens_to_lemmas_serialized = html.escape(json.dumps(self.tokens_to_lemmas),quote=True)
+        support_text_serialized = html.escape(json.dumps(self.support_text), quote=True)
+        return \
+            f"<span id='{id}' data-type='dual-language-chunk' data-support-text='{support_text_serialized}' data-tokens-to-lemmas='{tokens_to_lemmas_serialized}' class='dual-language-chunk'>{self.text}</span>"
+
+    def set_tokens_to_lemmas(self, tokens_to_lemmas):
+        self.tokens_to_lemmas = tokens_to_lemmas
+
+    def set_support_text(self, support_text):
+        self.support_text = support_text
+
+    def _get_lemmas(self):
+        return list(self.tokens_to_lemmas.values())

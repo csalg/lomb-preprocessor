@@ -29,3 +29,5 @@ def text_to_chunks(text):
     splits_merged.append(previous_split)
 
     return splits_merged
+
+
