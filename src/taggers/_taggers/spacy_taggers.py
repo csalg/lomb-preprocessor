@@ -1,14 +1,10 @@
-from abc import ABC, abstractmethod
-import os
-from copy import copy
-
 import spacy
 
-from taggers.regex import matches_punctuation
-from taggers.taggers.TaggerABC import TaggerABC
+from taggers._taggers._util import matches_punctuation
+from taggers._taggers._template import ITagger
 
 
-class BaseSpacyTagger(TaggerABC):
+class BaseSpacyTagger(ITagger):
     def __init__(self, processor=lambda : None):
         super().__init__(processor())
 

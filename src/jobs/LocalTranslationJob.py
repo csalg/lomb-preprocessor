@@ -6,7 +6,7 @@ from termcolor import colored
 import serial
 from util import LombPreprocessorException, infer_language
 from logging_ import logger
-from taggers.createTagger import createTagger
+from taggers import create_tagger
 from translators.selenium_translators import GoogleTranslator, DeepLTranslator
 from util import parse_title_source_language_and_extension_from_filename
 
@@ -20,7 +20,7 @@ class LocalTranslationJob():
             raise FileExistsException(f'{self.output_filename()} found in directory. Skipping')
 
         self.serializer = serial.create_serializer(input_filename, self.source_language, self.target_language)
-        self.tagger = createTagger(self.source_language)()
+        self.tagger = create_tagger(self.source_language)
         if self.source_language in ['dk', 'da']:
             self.translator = GoogleTranslator('da', self.target_language)
         else:

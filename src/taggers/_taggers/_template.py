@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class TaggerABC(ABC):
+class ITagger(ABC):
     def __init__(self, processor=None):
         self.processor = processor
 

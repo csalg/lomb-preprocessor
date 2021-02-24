@@ -1,14 +1,12 @@
-from abc import ABC, abstractmethod
 import os
-from copy import copy
 
 import spacy
 
-from taggers.regex import *
-from taggers.taggers.TaggerABC import TaggerABC
+from taggers._taggers._util import *
+from taggers._taggers._template import ITagger
 
 
-class GermanTagger(TaggerABC):
+class GermanTagger(ITagger):
     def __init__(self, processor=None):
         super().__init__(processor if processor else spacy.load('de_core_news_lg'))
         self._load_german_prepositions()
