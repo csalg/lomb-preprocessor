@@ -1,6 +1,6 @@
-import json
 import os
-from copy import copy
+import unicodedata
+import string
 
 import ebooklib
 import requests
@@ -16,6 +16,7 @@ from ..Chunk import Chunk
 
 class TxtSerializer(SerializerABC):
     def __init__(self, filename, source_language, target_language):
+        super().__init__(filename, source_language, target_language)
         convert_to_utf8(filename)
 
         with open(filename) as file:
@@ -77,7 +78,6 @@ class TxtSerializer(SerializerABC):
     
     def set_translation_dictionary(self, new_dictionary):
         self.__translation_dictionary = new_dictionary
-        print(new_dictionary)
 
     def get_lemmas_dictionary(self):
         return self.__lemmas_dictionary
@@ -88,7 +88,6 @@ class TxtSerializer(SerializerABC):
     def save_to_file(self, output_filename):
         self._add_support_text_to_chunks()
         self._add_lemmas_to_chunks()
-        # self._save_as_json(output_filename)
         self._save_as_txt(output_filename)
         self._save_as_html(output_filename)
 
@@ -102,20 +101,13 @@ class TxtSerializer(SerializerABC):
             tokens_to_lemmas = self.__lemmas_dictionary[chunk.text]
             chunk.set_tokens_to_lemmas(tokens_to_lemmas)
 
-    # def _save_as_json(self, output_filename):
-    #     with open(output_filename+'.json', 'w') as file:
-    #         json.dump({
-    #             "dictionary": self._translation_dictionary,
-    #             "chunks": self._chunks},
-    #             file)
-
     def _save_as_txt(self, output_filename):
-        print(self.__chunks)
         translated_chunks = list(map(lambda chunk : chunk.support_text, self.__chunks))
         translation = ''.join(translated_chunks)
 
         with open(output_filename, 'w') as file:
             file.write(translation)
+            print(f'{output_filename} was saved')
 
     def _save_as_html(self, output_filename):
         translated_chunks =[]
@@ -139,10 +131,9 @@ class TxtSerializer(SerializerABC):
         """
         with open(output_filename + '.html', 'w') as file:
             file.write(translation)
+            print(f'{output_filename + ".html"} was saved')
 
 
-import unicodedata
-import string
 
 valid_filename_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 char_limit = 70
