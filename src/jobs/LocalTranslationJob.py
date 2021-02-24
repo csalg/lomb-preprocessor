@@ -8,7 +8,6 @@ from translators import create_translator
 from util import LombPreprocessorException, infer_language
 from logging_ import logger
 from taggers import create_tagger
-from translators.selenium_translators import GoogleTranslator, DeepLTranslator
 from util import parse_title_source_language_and_extension_from_filename
 
 
