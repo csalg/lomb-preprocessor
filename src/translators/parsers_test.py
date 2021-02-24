@@ -1,4 +1,4 @@
-from .parsers import ParserABC, NewlineParser
+from translators.parsers import ParserABC, NewlineParser
 
 ids_and_sentences_to_translate = {
     1000: "Something something.",

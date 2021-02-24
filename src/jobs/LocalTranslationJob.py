@@ -4,6 +4,7 @@ from os.path import splitext
 from termcolor import colored
 
 import serial
+from translators import create_translator
 from util import LombPreprocessorException, infer_language
 from logging_ import logger
 from taggers import create_tagger
@@ -21,10 +22,7 @@ class LocalTranslationJob():
 
         self.serializer = serial.create_serializer(input_filename, self.source_language, self.target_language)
         self.tagger = create_tagger(self.source_language)
-        if self.source_language in ['dk', 'da']:
-            self.translator = GoogleTranslator('da', self.target_language)
-        else:
-            self.translator = DeepLTranslator(self.source_language, self.target_language)
+        self.translator = create_translator(self.source_language, self.target_language)
 
     def run(self):
         logger.info(f'{colored(self.title + "." + self.extension, "yellow")} will be translated from {colored(self.source_language, "red")} to {colored(self.target_language, "red")}')
