@@ -12,7 +12,7 @@ extensions_to_serializers = {
 }
 
 
-def create_constructor(filename):
+def create_serializer(filename, source_language, target_language):
     _, extension = os.path.splitext(filename)
     extension = extension[1:]
     if extension in extensions_to_serializers:
@@ -21,7 +21,7 @@ def create_constructor(filename):
         constructor = TxtSerializer.from_website
     else:
         raise Exception(f'Serializer not found for {filename}')
-    return constructor
+    return constructor(filename, source_language, target_language)
 
 
 is_recognized_extension = \

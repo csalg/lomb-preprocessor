@@ -19,8 +19,7 @@ class LocalTranslationJob():
         if os.path.isfile(self.output_filename()):
             raise FileExistsException(f'{self.output_filename()} found in directory. Skipping')
 
-        serializer_constructor = serial.create_constructor(input_filename)
-        self.serializer = serializer_constructor(input_filename, self.source_language, self.target_language)
+        self.serializer = serial.create_serializer(input_filename, self.source_language, self.target_language)
         self.tagger = createTagger(self.source_language)()
         if self.source_language in ['dk', 'da']:
             self.translator = GoogleTranslator('da', self.target_language)
