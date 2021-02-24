@@ -26,3 +26,11 @@ WAIT_FOR_IP_UNBLOCK = 60*60
 TRANSLATION_DICTIONARY_FILENAME = 'translation_dictionary.pkl'
 MAX_TRANSLATION_ITERATIONS = 3
 LOGGING_LEVEL = logging.INFO
+LANGUAGES = ['en', 'es', 'de', 'zh', 'fr', 'da']
+LANGUAGES_MAP = {
+    'deu': 'de',
+    'esp': 'es',
+    'eng': 'en',
+    'en-us': 'en',
+    'en-US': 'en'
+}

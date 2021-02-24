@@ -4,11 +4,10 @@ from os.path import splitext
 from termcolor import colored
 
 import serial
-from util import LombPreprocessorException
+from util import LombPreprocessorException, infer_language
 from logging_ import logger
 from taggers.createTagger import createTagger
 from translators.selenium_translators import GoogleTranslator, DeepLTranslator
-from translators_old.util import infer_language
 from util import parse_title_source_language_and_extension_from_filename
 
 

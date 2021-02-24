@@ -1,8 +1,19 @@
 import os
 import chardet
 
+from config import LANGUAGES_MAP, LANGUAGES
 from logging_ import logger
 
+
+
+
+def infer_language(language):
+    language = language.lower()
+    if language in LANGUAGES:
+        return language
+    if language in LANGUAGES_MAP:
+        return LANGUAGES_MAP[language]
+    raise Exception(f"Could not infer language from '{language}'")
 
 def parse_title_source_language_and_extension_from_filename(filename):
     title_and_source_language, extension = os.path.splitext(filename)
