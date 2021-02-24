@@ -48,15 +48,15 @@ class VttSerializer(SerializerABC):
 
     def __translate_source(self, dictionary, format_captions = True):
         translation = deepcopy(self.source)
-        print(dictionary)
         for caption in translation:
             key = convert_to_key(caption.text)
             new_text = dictionary[key] if key in dictionary else ""
+            if key not in dictionary:
+                print(f"NOT FOUND: {key}")
             if type(new_text) == dict:
                 new_text = ','.join(new_text.values())
             if format_captions:
                 new_text = format_caption(new_text)
-            print(key, new_text)
             caption.text = new_text
         return translation
 
