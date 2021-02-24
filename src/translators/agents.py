@@ -3,11 +3,9 @@ import time
 from abc import abstractmethod, ABC
 from datetime import datetime, timedelta
 
-from selenium.webdriver import ActionChains
-
 from config import MAX_WAIT_FOR_TRANSLATION, MINIMUM_ACCEPTABLE_TRANSLATION_RATIO, MIN_WAIT_FOR_TRANSLATION
 from logging_ import logger
-from translators.util import make_headless_selenium_driver, to_deepl_language
+from translators._util import make_headless_selenium_driver, to_deepl_language
 
 
 class SeleniumAgentABC(ABC):

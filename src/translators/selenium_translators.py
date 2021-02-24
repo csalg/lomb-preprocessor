@@ -5,11 +5,11 @@ from random import random
 from config import MAX_CHARACTERS_PER_BUFFER, MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN, WAIT_FOR_IP_UNBLOCK, \
     MAX_NUMBER_OF_REQUESTS_WITH_SAME_DRIVER, WAIT_BETWEEN_DRIVER_CHANGE, MAX_TRANSLATION_ITERATIONS
 from logging_ import logger
-from translators.TranslatorABC import TranslatorABC
+from translators._interface import ITranslator
 from translators.agents import GoogleTranslateAgent, SeleniumAgentABC, TIMEOUT_EXCEPTION, TEMPORARY_BAN_EXCEPTION, \
     UNKNOWN_EXCEPTION, DeeplAgent
 from translators.parsers import NewlineParser, ParserABC
-from translators.util import PersistedDictionary, pretty_print
+from translators._util import PersistedDictionary
 from util import print_progress_bar
 
 
@@ -108,7 +108,7 @@ class SeleniumTranslator():
         return list(filter(lambda x : bool(x[0].strip('\n')) and not bool(x[1]), translation_dictionary.items()))
 
 
-class GoogleTranslator(TranslatorABC):
+class GoogleTranslator(ITranslator):
 
     def __init__(self, source_language, target_language):
         super().__init__(source_language, target_language)
@@ -122,7 +122,7 @@ class GoogleTranslator(TranslatorABC):
     def translate(self, translation_dictionary):
         return self.selenium_translator.translate(translation_dictionary)
 
-class DeepLTranslator(TranslatorABC):
+class DeepLTranslator(ITranslator):
 
     def __init__(self, source_language, target_language):
         super().__init__(source_language, target_language)
