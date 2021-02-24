@@ -6,7 +6,7 @@ import webvtt
 
 from util import convert_to_utf8
 
-from ._template import SerializerABC
+from ._interface import SerializerABC
 from serial._serializers._util import convert_to_key, format_caption
 
 class VttSerializer(SerializerABC):

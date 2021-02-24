@@ -1,7 +1,7 @@
 import spacy
 
 from taggers._taggers._util import matches_punctuation
-from taggers._taggers._template import ITagger
+from taggers._taggers._interface import ITagger
 
 
 class BaseSpacyTagger(ITagger):
