@@ -8,7 +8,7 @@ ids_and_sentences_to_translate = {
 
 def parser_tester(parser_constructor):
     parser = parser_constructor()
-    buffer = ""
+    buffer = "\n\n hfdlasf \n"
     for id, sentence in ids_and_sentences_to_translate.items():
         buffer += parser.encode_sentence(id,sentence)
 

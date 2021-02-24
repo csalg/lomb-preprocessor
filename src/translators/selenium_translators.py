@@ -3,12 +3,14 @@ import time
 from random import random
 
 from config import MAX_CHARACTERS_PER_BUFFER, MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN, WAIT_FOR_IP_UNBLOCK, \
-    MAX_NUMBER_OF_REQUESTS_WITH_SAME_DRIVER, WAIT_BETWEEN_DRIVER_CHANGE
+    MAX_NUMBER_OF_REQUESTS_WITH_SAME_DRIVER, WAIT_BETWEEN_DRIVER_CHANGE, MAX_TRANSLATION_ITERATIONS
+from logging_ import logger
 from translators.TranslatorABC import TranslatorABC
-from translators.agents import GoogleTranslateAgent, AgentABC, TIMEOUT_EXCEPTION, TEMPORARY_BAN_EXCEPTION, \
-    UNKNOWN_EXCEPTION
+from translators.agents import GoogleTranslateAgent, SeleniumAgentABC, TIMEOUT_EXCEPTION, TEMPORARY_BAN_EXCEPTION, \
+    UNKNOWN_EXCEPTION, DeeplAgent
 from translators.parsers import NewlineParser, ParserABC
-from translators.util import PersistedDictionary
+from translators.util import PersistedDictionary, pretty_print
+from util import print_progress_bar
 
 
 class SeleniumTranslator():
@@ -21,10 +23,10 @@ class SeleniumTranslator():
         self.source_language = source_language
         self.target_language = target_language
         self.parser : ParserABC = parser_constructor()
-        self.agent : AgentABC = agent_constructor(source_language, target_language)
+        self.agent : SeleniumAgentABC = agent_constructor(source_language, target_language)
         self.__current_sentence_id = int(random() * 10000)
 
-    def translate(self, translation_dictionary):
+    def translate(self, translation_dictionary, iterations=0):
         translation_dictionary = PersistedDictionary(translation_dictionary)
 
         self.agent.start()
@@ -49,8 +51,8 @@ class SeleniumTranslator():
                         self.agent.start()
                         requests_with_same_driver = 0
                     new_translations = self.__buffer_to_new_translations(ids_to_source_sentences, buffer)
-                    print(new_translations)
                     translation_dictionary.update(new_translations)
+                    print_progress_bar(len_with_value(translation_dictionary.values()), len_with_value(translation_dictionary.keys()))
                     buffer = ""
                     requests_with_same_driver += 1
             buffer += '\n' + source_sentence_encoded
@@ -58,7 +60,18 @@ class SeleniumTranslator():
         if buffer:
             new_translations = self.__buffer_to_new_translations(ids_to_source_sentences, buffer)
             translation_dictionary.update(new_translations)
-        print(translation_dictionary)
+        if len(self.__translation_dictionary_contains_empty_values(translation_dictionary)):
+            logger.info('Empty values found in dictionary after translation')
+            logger.info(self.__translation_dictionary_contains_empty_values(translation_dictionary))
+            logger.info(f'Iterations {iterations}/{MAX_TRANSLATION_ITERATIONS}')
+            if iterations < MAX_TRANSLATION_ITERATIONS:
+                logger.info('New translation pass will be called.')
+                return self.translate(translation_dictionary, iterations=iterations+1)
+            else:
+                logger.warning('Max number of iterations reached. Giving up.')
+
+        print_progress_bar(len_with_value(translation_dictionary.values()),
+                           len_with_value(translation_dictionary.keys()))
         return translation_dictionary
 
     def __next_id(self):
@@ -67,26 +80,33 @@ class SeleniumTranslator():
         return self.__current_sentence_id + 1000
 
     def __buffer_to_new_translations(self,ids_to_source_sentences, buffer):
-        if len(buffer) > MAX_CHARACTERS_PER_BUFFER:
+        if len(buffer) > MAX_CHARACTERS_PER_BUFFER + 100:
             raise Exception(f'Buffer length {len(buffer)} exceeds the limit ({MAX_CHARACTERS_PER_BUFFER})')
         timeouts = 1
         while True:
             try:
                 translated_buffer = self.agent.translate_buffer(buffer)
+                logger.debug('Received translated buffer in translator. Will parse.')
                 new_translations = self.parser.parse_translated_buffer(ids_to_source_sentences, translated_buffer)
+                logger.debug('Translations parsed')
+                logger.debug(new_translations)
                 return new_translations
             except TEMPORARY_BAN_EXCEPTION as e:
-                logging.warning(str(e))
-                logging.warning(f'Sleeping {WAIT_FOR_IP_UNBLOCK / 60} minutes.')
+                logger.warning(str(e))
+                logger.warning(f'Sleeping {WAIT_FOR_IP_UNBLOCK / 60} minutes.')
                 time.sleep(WAIT_FOR_IP_UNBLOCK)
             except (UNKNOWN_EXCEPTION, TIMEOUT_EXCEPTION) as e:
-                logging.warning(str(e))
+                logger.warning(str(e))
                 if timeouts == MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN:
-                    logging.warning(f'Timeouts: {timeouts} / {MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN}. Assuming temporary ban')
-                    logging.warning(f'Sleeping {WAIT_FOR_IP_UNBLOCK/60} minutes.')
+                    logger.warning(f'Timeouts: {timeouts} / {MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN}. Assuming temporary ban')
+                    logger.warning(f'Sleeping {WAIT_FOR_IP_UNBLOCK/60} minutes.')
                     time.sleep(WAIT_FOR_IP_UNBLOCK)
-                logging.warning(f'Timeout {timeouts}/{MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN}')
+                logger.warning(f'Timeout {timeouts}/{MAX_TIMEOUTS_BEFORE_ASSUMING_TEMPORARY_BAN}')
                 timeouts+=1
+
+    def __translation_dictionary_contains_empty_values(self, translation_dictionary):
+        return list(filter(lambda x : bool(x[0].strip('\n')) and not bool(x[1]), translation_dictionary.items()))
+
 
 class GoogleTranslator(TranslatorABC):
 
@@ -101,5 +121,23 @@ class GoogleTranslator(TranslatorABC):
 
     def translate(self, translation_dictionary):
         return self.selenium_translator.translate(translation_dictionary)
+
+class DeepLTranslator(TranslatorABC):
+
+    def __init__(self, source_language, target_language):
+        super().__init__(source_language, target_language)
+        self.selenium_translator = \
+            SeleniumTranslator(source_language,
+                               target_language,
+                               NewlineParser,
+                               DeeplAgent
+                               )
+
+    def translate(self, translation_dictionary):
+        return self.selenium_translator.translate(translation_dictionary)
+
+def len_with_value(values):
+    with_values = list(filter(lambda x : bool(x.strip('\n')), values))
+    return len(with_values)
 
 

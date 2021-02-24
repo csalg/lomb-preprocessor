@@ -2,6 +2,9 @@ import logging
 import re
 from abc import ABC, abstractmethod
 
+from logging_ import logger
+
+
 class ParserABC(ABC):
     @abstractmethod
     def encode_sentence(self, id, sentence):
@@ -18,6 +21,7 @@ class NewlineParser(ParserABC):
         return f'{id}\n{sentence}\n'
 
     def parse_translated_buffer(self, ids_to_source_sentences, buffer):
+        logger.debug('Parsing buffer')
         lines = buffer.splitlines()
         buffer_translation_dictionary = {}
         i = 0
@@ -36,9 +40,10 @@ class NewlineParser(ParserABC):
         while i < len(lines):
             if NewlineParser.matchNumbers.match(lines[i]):
                 id = int(lines[i])
-                i += 1
-                if id in ids_to_source_sentences:
-                    break
+            i += 1
+            if id in ids_to_source_sentences:
+                break
+
 
         if id == -1:
             raise Exception("No more sentences to parse")
